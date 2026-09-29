@@ -19,6 +19,26 @@ describe('SPEECH_MODEL_CATALOG', () => {
     ])
   })
 
+  it('registers Whisper Large v3 as a non-streaming local whisper model', () => {
+    const model = getCatalogModel('whisper-large-v3')
+
+    expect(model).toBeDefined()
+    expect(model?.type).toBe('whisper')
+    expect(model?.provider).toBe('local')
+    expect(model?.language).toBe('multilingual')
+    expect(model?.streaming).toBe(false)
+    expect(model?.files).toEqual([
+      'large-v3-encoder.int8.onnx',
+      'large-v3-decoder.int8.onnx',
+      'large-v3-tokens.txt'
+    ])
+    expect(model?.downloadFiles?.map(({ name }) => name)).toEqual([
+      'large-v3-encoder.int8.onnx',
+      'large-v3-decoder.int8.onnx',
+      'large-v3-tokens.txt'
+    ])
+  })
+
   it('has unique ids across the catalog', () => {
     const ids = SPEECH_MODEL_CATALOG.map((m) => m.id)
 

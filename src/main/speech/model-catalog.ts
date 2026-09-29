@@ -112,6 +112,18 @@ export const SPEECH_MODEL_CATALOG: SpeechModelManifest[] = [
     streaming: false
   },
   {
+    id: 'whisper-large-v3',
+    label: 'Whisper Large v3',
+    description:
+      '90+ languages. Highest-accuracy Whisper variant, but much larger and slower than Tiny.',
+    type: 'whisper',
+    provider: 'local',
+    language: 'multilingual',
+    ...getSpeechModelDownloadMetadata('whisper-large-v3'),
+    sampleRate: 16000,
+    streaming: false
+  },
+  {
     id: 'sense-voice-zh-en-ja-ko-yue',
     label: 'SenseVoice',
     description:
