@@ -83,7 +83,7 @@ const {
 
     constructor(
       readonly modelId: string,
-      readonly readApiKey: () => string
+      readonly resolveTarget: (modelId: string) => { apiKey: string | null }
     ) {
       HoistedMockOpenAiTranscriptionSession.instances.push(this)
     }
@@ -93,7 +93,7 @@ const {
     }
 
     finish(): Promise<string> {
-      return Promise.resolve(`${this.modelId}:${this.readApiKey()}`)
+      return Promise.resolve(`${this.modelId}:${this.resolveTarget(this.modelId).apiKey}`)
     }
   }
 
@@ -149,6 +149,14 @@ vi.mock('./model-catalog', () => ({
 
 vi.mock('./openai-api-key-store', () => ({
   readOpenAiSpeechApiKey: readOpenAiSpeechApiKeyMock
+}))
+
+vi.mock('./stt-transcription-target', () => ({
+  resolveTranscriptionTarget: (modelId: string) => ({
+    url: 'https://api.openai.com/v1/audio/transcriptions',
+    apiKey: readOpenAiSpeechApiKeyMock(),
+    apiModel: modelId
+  })
 }))
 
 vi.mock('./openai-transcription-client', () => ({

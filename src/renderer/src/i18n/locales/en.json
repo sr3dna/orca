@@ -9019,7 +9019,11 @@
           "f9a9cf6928": "Microphone permission is required before enabling voice dictation.",
           "1eac933202": "Opened macOS Privacy & Security. Enable dictation again after granting access.",
           "cd9fe37556": "Microphone permission granted",
-          "openAiKeyName": "Your OpenAI transcription key"
+          "openAiKeyName": "Your OpenAI transcription key",
+          "customEndpointSaved": "Custom transcription endpoint saved",
+          "customEndpointSaveFailed": "Failed to save custom endpoint",
+          "customEndpointCleared": "Custom transcription endpoint cleared",
+          "customEndpointClearFailed": "Failed to clear custom endpoint"
         },
         "WorktreeSymlinksSection": {
           "1c1e35b219": "Remove {{value0}}",
@@ -12248,6 +12252,19 @@
         },
         "UnsealedCredentialNotice": {
           "body": "{{credential}} is stored unencrypted — this system has no OS keyring Orca can use. Anyone who can read your disk or a backup of it can read the credential. Install and unlock gnome-keyring or kwallet, then save it again to seal it."
+        },
+        "CustomSttEndpointDialog": {
+          "title": "Custom transcription endpoint",
+          "description": "Audio is sent to this server only when the Custom endpoint model is selected.",
+          "baseUrl": "Base URL",
+          "model": "Model",
+          "apiKey": "API Key (optional)",
+          "apiKeyConfigured": "Token configured",
+          "apiKeyOptional": "Leave empty for self-hosted servers",
+          "hint": "Works with any OpenAI-compatible /audio/transcriptions server, e.g. a local worker on 127.0.0.1.",
+          "clear": "Disconnect",
+          "test": "Test",
+          "save": "Save"
         }
       },
       "right": {
