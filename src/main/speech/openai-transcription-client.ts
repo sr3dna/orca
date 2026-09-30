@@ -5,9 +5,19 @@ export const OPENAI_TRANSCRIPTION_MODEL_BY_ID: Record<string, string> = {
   'openai-gpt-4o-transcribe': 'gpt-4o-transcribe'
 }
 
-const OPENAI_TRANSCRIPTION_URL = 'https://api.openai.com/v1/audio/transcriptions'
+export const OPENAI_TRANSCRIPTION_URL = 'https://api.openai.com/v1/audio/transcriptions'
 const CLOUD_TRANSCRIPTION_SAMPLE_RATE = 16000
 const MAX_CLOUD_AUDIO_SECONDS = 10 * 60
+
+/**
+ * Resolved POST target for an OpenAI-shaped transcription request. `apiKey` is null
+ * for self-hosted endpoints that do not authenticate (e.g. a local sidecar).
+ */
+export type OpenAiTranscriptionTarget = {
+  url: string
+  apiKey: string | null
+  apiModel: string
+}
 
 type OpenAiTranscriptionResponse = {
   text?: unknown
@@ -83,7 +93,7 @@ export class OpenAiTranscriptionSession {
 
   constructor(
     private readonly modelId: string,
-    private readonly readApiKey: () => string
+    private readonly resolveTarget: (modelId: string) => OpenAiTranscriptionTarget
   ) {}
 
   feedAudio(samples: Float32Array, sampleRate: number): void {
@@ -100,26 +110,21 @@ export class OpenAiTranscriptionSession {
       return ''
     }
 
-    const apiModel = OPENAI_TRANSCRIPTION_MODEL_BY_ID[this.modelId]
-    if (!apiModel) {
-      throw new Error(`Unknown OpenAI transcription model: ${this.modelId}`)
-    }
+    const target = this.resolveTarget(this.modelId)
 
     const audio = combineChunks(this.chunks)
     this.chunks = []
     const wav = encodePcm16Wav(audio, CLOUD_TRANSCRIPTION_SAMPLE_RATE)
     const form = new FormData()
-    form.append('model', apiModel)
+    form.append('model', target.apiModel)
     form.append('response_format', 'json')
     // Why: OpenAI's transcription endpoint expects a multipart file object;
     // a named WAV blob avoids filesystem temp files and works in packaged apps.
     form.append('file', new Blob([new Uint8Array(wav)], { type: 'audio/wav' }), 'dictation.wav')
 
-    const response = await fetch(OPENAI_TRANSCRIPTION_URL, {
+    const response = await fetch(target.url, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.readApiKey()}`
-      },
+      headers: target.apiKey ? { Authorization: `Bearer ${target.apiKey}` } : {},
       body: form
     })
 
@@ -129,7 +134,7 @@ export class OpenAiTranscriptionSession {
         typeof data.error?.message === 'string'
           ? sanitizeOpenAiTranscriptionErrorMessage(data.error.message)
           : response.statusText
-      throw new Error(`OpenAI transcription failed: ${message}`)
+      throw new Error(`Transcription failed: ${message}`)
     }
 
     return parseOpenAiTranscriptionResponse(data)
