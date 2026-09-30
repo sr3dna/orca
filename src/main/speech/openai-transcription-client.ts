@@ -17,6 +17,8 @@ export type OpenAiTranscriptionTarget = {
   url: string
   apiKey: string | null
   apiModel: string
+  /** ISO-639 language hint for the multipart `language` field; undefined = auto-detect. */
+  language?: string
 }
 
 type OpenAiTranscriptionResponse = {
@@ -118,6 +120,9 @@ export class OpenAiTranscriptionSession {
     const form = new FormData()
     form.append('model', target.apiModel)
     form.append('response_format', 'json')
+    if (target.language) {
+      form.append('language', target.language)
+    }
     // Why: OpenAI's transcription endpoint expects a multipart file object;
     // a named WAV blob avoids filesystem temp files and works in packaged apps.
     form.append('file', new Blob([new Uint8Array(wav)], { type: 'audio/wav' }), 'dictation.wav')

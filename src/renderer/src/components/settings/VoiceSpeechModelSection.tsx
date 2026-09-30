@@ -95,10 +95,13 @@ export function VoiceSpeechModelSection({
                 key={manifest.id}
                 disabled={isDownloading}
                 onSelect={(event) => {
-                  if (isReady) {
-                    onUpdateVoiceSettings({ sttModel: manifest.id })
-                  } else if (manifest.provider === 'custom') {
+                  if (manifest.provider === 'custom') {
+                    // Why: the endpoint row is both the selector and its own editor, so
+                    // clicking it always opens the dialog (which re-selects the model).
+                    event.preventDefault()
                     onOpenCustomEndpointDialog(manifest.id)
+                  } else if (isReady) {
+                    onUpdateVoiceSettings({ sttModel: manifest.id })
                   } else if (isCloud) {
                     onOpenOpenAiDialog(manifest.id)
                   } else if (!isDownloading) {
@@ -163,7 +166,13 @@ export function VoiceSpeechModelSection({
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                    {manifest.description}
+                    {manifest.provider === 'custom' && voiceSettings.customSttBaseUrl
+                      ? `${voiceSettings.customSttBaseUrl} · ${voiceSettings.customSttModel}${
+                          voiceSettings.customSttLanguage
+                            ? ` · ${voiceSettings.customSttLanguage}`
+                            : ''
+                        }`
+                      : manifest.description}
                   </p>
                 </div>
                 {!isCloud && isReady ? (
