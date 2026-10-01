@@ -63,6 +63,13 @@ required to press **Test**, which only needs a base URL to prove reachability.
 As with language, the discovered names are suggestions, not a whitelist — the
 user can always type a model the endpoint did not advertise.
 
+The same probe drives a status mark inside the Base URL field: a green tick when
+the endpoint answers, a red cross when it does not, and a spinner while checking.
+"Answers" is deliberately looser than "returned a model list" — a `401` means the
+server is there and just wants a token, so it gets a tick, not a cross. Only a
+transport failure (DNS, refused connection, timeout) or a non-auth error with no
+usable response earns the red mark.
+
 ## The language field: free text, with suggestions
 
 The language field is deliberately **free text with a suggestion list**, not a
