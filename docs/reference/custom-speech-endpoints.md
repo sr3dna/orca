@@ -45,6 +45,24 @@ The endpoint is considered "ready" whenever a base URL and model are saved; ther
 is no API-key gate (unlike the OpenAI cloud models). Dictation audio is only sent
 to this server while the **Custom endpoint** model is selected.
 
+## Model field: discovered suggestions
+
+After the user types a base URL (debounced), Orca asks the endpoint what it
+supports and turns the answers into suggestions for the Model field. There is no
+single standard for this either, so the probe tries, in order:
+
+1. `GET <root>/v1/models` — the OpenAI shape (`{ data: [{ id }] }`).
+2. `GET <root>/health` — leaner self-hosted servers (e.g. a `faster-whisper`
+   worker) expose `supportedModels` here instead.
+3. `GET <root>/models` — a common alternative.
+
+Where `<root>` strips a trailing `/v1` or `/audio/transcriptions` so any base URL
+form works. A miss is harmless: the field stays free text and a model is **not**
+required to press **Test**, which only needs a base URL to prove reachability.
+
+As with language, the discovered names are suggestions, not a whitelist — the
+user can always type a model the endpoint did not advertise.
+
 ## The language field: free text, with suggestions
 
 The language field is deliberately **free text with a suggestion list**, not a
