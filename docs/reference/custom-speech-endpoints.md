@@ -127,13 +127,32 @@ Two implementation notes:
 
 ## Security posture
 
-- The endpoint URL is user-controlled, so only `http`/`https` are accepted and
-  the value is validated before any request. The desktop app makes the request
-  from the user's own machine, so this is not a server-side SSRF surface.
-- The bearer token is never logged, and the Test request never follows a redirect
-  with credentials.
-- Self-hosted workers are commonly unauthenticated; bind them to loopback
-  (`127.0.0.1`) rather than `0.0.0.0`.
+The endpoint is **not restricted to loopback or to local addresses**. A user may
+point it at any `http(s)` host, including a public one. That is deliberate:
+
+- This is a **desktop client**, and the base URL is chosen by the person at the
+  keyboard, who is choosing where *their own* audio is sent — the same trust
+  model as configuring any CLI tool or chat client with an endpoint. The request
+  originates from the user's own machine, so there is no server-side SSRF surface
+  for an attacker to pivot through.
+- Restricting to `127.0.0.1` would break the legitimate remote case — a
+  self-hosted worker on a LAN box, a tailnet host, or a company STT gateway that
+  the user is entitled to use.
+- A public URL is not inherently less safe here: the audio leaves the machine
+  either way (the built-in OpenAI cloud models already do), and the user makes
+  that choice explicitly.
+
+The guards that do apply:
+
+- Only `http`/`https` are accepted; the URL is parsed and validated before any
+  request, so `file:`, `ftp:`, etc. are rejected.
+- The request is a plain `POST` of the audio plus form fields. It cannot be used
+  to read local files or arbitrary URLs, and the app never renders the response
+  as HTML.
+- The bearer token is never logged, and the Test request never carries credentials
+  across a redirect to another host.
+- Self-hosted workers are commonly unauthenticated; the docs and the dialog hint
+  recommend binding them to loopback (`127.0.0.1`) rather than `0.0.0.0`.
 
 ## Related code
 
