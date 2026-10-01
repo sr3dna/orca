@@ -65,10 +65,15 @@ user can always type a model the endpoint did not advertise.
 
 The same probe drives a status mark inside the Base URL field: a green tick when
 the endpoint answers, a red cross when it does not, and a spinner while checking.
-"Answers" is deliberately looser than "returned a model list" — a `401` means the
-server is there and just wants a token, so it gets a tick, not a cross. Only a
-transport failure (DNS, refused connection, timeout) or a non-auth error with no
-usable response earns the red mark.
+
+Reachability is judged against the **actual transcription route**, not a health or
+models endpoint. A base URL missing its `/v1` segment still answers `/health` with
+200, so a health probe would show a green tick for a URL whose
+`/audio/transcriptions` path is a 404. Instead a `POST` with no audio file is sent
+to the resolved transcription URL: a `404` means the path does not exist (wrong
+URL), while anything else — `200`, `400`, `401`, `403`, `405`, `422` — proves the
+route is served. A `401` therefore gets a tick (right URL, missing token), and only
+a `404` or a transport failure (DNS, refused, timeout) earns the red cross.
 
 ## The language field: free text, with suggestions
 
